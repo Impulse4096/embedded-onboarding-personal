@@ -46,6 +46,6 @@ size_t cbuf_read(cbuf_t *cb, uint8_t *out, size_t len);
 
 // Lets you look at a item without removing it
 
-bool cbuf_peak(const cbuf_t *cb, size_t index, uint8_t *out);
+bool cbuf_peek(const cbuf_t *cb, size_t index, uint8_t *out);
 
 #endif

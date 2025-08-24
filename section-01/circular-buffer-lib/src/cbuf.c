@@ -136,3 +136,45 @@ bool cbuf_peek(const cbuf_t *cb, size_t index, uint8_t *out)
 	
 }
 	
+
+/* This function writes into a cb buffer with len bytes from data array
+If we have no buffer, memory, values, or array, do nothing.
+Then we check size of memory we want to write and current buffer space and depending on which is smaller, data can be written or not. 
+Then we basically write as much as we can possibly without having overflow in the end of the buffer. 
+The next part basically writes the remaining parts left to the beginning of the buffer for the wraparound.
+Finally we check flag if head has caughth up to tail and if we wrote something to mark buffer as full.
+At last we write the number of successfully written bytes.
+*/
+
+size_t cbuf_write(cbuf_t *cb, const uint8_t *data, size_t len)
+{
+	if (!cb || !cb->buffer || !data || len == 0) return 0;
+	
+	size_t sz = cbuf_size(cb);
+	size_t free_space = cb->capacity - sz;
+	size_t to_write = (len < free_space) ? len : free_space;
+	if (to_write == 0) return 0;
+
+	size_t head_to_end = cb->capacity - cb->head;
+	size_t first = (to_write < head_to_end) ? to_write : head_to_end;
+
+	if (first)
+	{
+		memcpy(&cb->buffer[cb->head], data, first);
+		cb->head = (cb->head + first) % cb->capacity;
+	}
+	
+	size_t remaining = to_write - first;
+	if (remaining)
+	{
+		memcpy(&cb->buffer[cb->head], data + first, remaining);
+		cb->head = (cb->head + remaining) % cb->capacity;
+	}
+
+	
+	cb->full = (cb->head == cb->tail) && (to_write > 0);
+	
+	return to_write;
+}
+
+
