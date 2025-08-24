@@ -36,13 +36,13 @@ size_t cbuf_size(const cbuf_t *cb);
 
 // Single byte input output
 
-bool cbuf_put(cbuf_t *cb, unit8_t byte);
+bool cbuf_put(cbuf_t *cb, uint8_t byte);
 bool cbuf_get(cbuf_t *cb, uint8_t *out);
 
 // Multi byte input output
 
 size_t cbuf_write(cbuf_t *cb, const uint8_t *data, size_t len);
-size_t cbuf_read(cbuf_t *cb, unit8_t *out, size_t len);
+size_t cbuf_read(cbuf_t *cb, uint8_t *out, size_t len);
 
 // Lets you look at a item without removing it
 

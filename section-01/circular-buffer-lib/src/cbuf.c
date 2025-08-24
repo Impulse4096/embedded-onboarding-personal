@@ -72,7 +72,7 @@ size_t cbuf_size(const cbuf_t *cb)
 	if (!cb) return 0;
 	if (cb->full) return cb->capacity;
 	if (cb->head >= cb->tail) return cb->head - cb->tail;
-	return cb->capcity - (cb->tail - cb->head);
+	return cb->capacity - (cb->tail - cb->head);
 }
 
 /* The function uses a pointer to put a byte in the buffer.
@@ -114,7 +114,7 @@ We then do a safetcy check on buffer struct and make sure our pointer is not at 
 Then in the loop we put values and we stop once we reached one below the size to put the correct number of bytes.
 */
 
-size_t cbuf_read(cbuf_t *cb, uint8_t *out, size len)
+size_t cbuf_read(cbuf_t *cb, uint8_t *out, size_t len)
 {
 	if (!cb || !out) return 0;
 	size_t n = 0;
@@ -125,7 +125,7 @@ size_t cbuf_read(cbuf_t *cb, uint8_t *out, size len)
 /* This function lets you look into a function without getting rid of its values. 
 First we make sure the struct and pointer exists. We also make sure value is not empty and we reference a actual index in the buffer.
 Then we calculate the position using tail and the index we want while accounting for wraparound.
-Finally we output our value and return true.
+Finally we output our value and return true.*/
 
 bool cbuf_peek(const cbuf_t *cb, size_t index, uint8_t *out)
 {
