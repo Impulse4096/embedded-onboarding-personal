@@ -16,15 +16,16 @@ Implements enqueue/dequeue, size checks, and wraparound handling.
 
 ---
 
-'''
+
 ## Project Structure
+```
 section-01/circular-buffer-lib/
 ├── inc/ # Header files (public API, function prototypes)
 ├── src/ # Source files (implementation of circular buffer functions)
 ├── tests/ # Unit tests (verifies correctness of functions)
 ├── Makefile # Build automation
 └── README.md # Project documentation
-'''
+```
 
 ---
 
@@ -34,4 +35,5 @@ make        # build the library and tests
 make clean  # remove build artifacts
 make test   # run unit tests (if defined in Makefile)
 make run    # alternative test target
+
 
