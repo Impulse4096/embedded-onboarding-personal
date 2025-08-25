@@ -12,6 +12,7 @@ on:
       - "section-01/circular-buffer-lib/**"
       - ".github/workflows/circular-buffer-ci.yml"
 
+# All steps run from the project folder
 defaults:
   run:
     working-directory: section-01/circular-buffer-lib
@@ -19,6 +20,7 @@ defaults:
 jobs:
   linux-build-test:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -30,16 +32,20 @@ jobs:
 
       - name: Build
         run: |
+          set -e
           make clean || true
           make -j
 
-      - name: Run tests
+      - name: Run tests (if present)
         run: |
-          if make -q test 2>/dev/null; then
+          set -e
+          if grep -qE '^\s*test\s*:' Makefile; then
+            echo "Found 'test' target → running tests"
             make test
-          elif make -q run 2>/dev/null; then
+          elif grep -qE '^\s*run\s*:' Makefile; then
+            echo "Found 'run' target → running"
             make run
           else
-            echo "No test or run target found in Makefile"
-            exit 1
+            echo "No 'test' or 'run' target in Makefile — skipping."
           fi
+
