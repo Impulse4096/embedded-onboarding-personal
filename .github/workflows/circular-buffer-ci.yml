@@ -39,10 +39,10 @@ jobs:
       - name: Run tests (if present)
         run: |
           set -e
-          if grep -qE '^\s*test\s*:' Makefile; then
+          if grep -qE '^test\s*:' Makefile; then
             echo "Found 'test' target → running tests"
             make test
-          elif grep -qE '^\s*run\s*:' Makefile; then
+          elif grep -qE '^run\s*:' Makefile; then
             echo "Found 'run' target → running"
             make run
           else
