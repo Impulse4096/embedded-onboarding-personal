@@ -1,72 +1,47 @@
-# We first set up the compiler and archiver tool with flags
-CC      ?= gcc
-AR      ?= ar
-ARFLAGS ?= rcs
+# Directories
+SRC_DIR := src
+INC_DIR := inc
+TEST_DIR := tests
+BUILD_DIR := build
 
-# We set up the flag with c11 standard, all warnings and extra warnings, and optimization level 2
-# We set variables for our inc src and build files
-CFLAGS  ?= -std=c11 -Wall -Wextra -O2
-INCDIR   = inc
-SRC_DIR  = src
-BUILD    = build
+# Tools & flags
+CC := gcc
+CFLAGS := -std=c11 -Wall -Wextra -Werror -I$(INC_DIR)
 
-# We set up our object and library files to variables
-OBJS     = $(BUILD)/cbuf.o
-LIB      = $(BUILD)/libcbuf.a
+# Sources/objects
+SRC      := $(wildcard $(SRC_DIR)/*.c)
+OBJ      := $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(SRC))
+TEST_SRC := $(wildcard $(TEST_DIR)/*.c)
+TEST_OBJ := $(patsubst $(TEST_DIR)/%.c,$(BUILD_DIR)/%.o,$(TEST_SRC))
 
-# We do the same for our demo object and target files
-DEMOOBJ  = $(BUILD)/main.o
-TARGET   = $(BUILD)/cbuffer_demo
+# Targets
+all: $(BUILD_DIR)/libcbuf.a $(BUILD_DIR)/tests
 
-#We declare our test files for compilation
-TEST_DIR := TESTS
-TEST_SRC := $(TEST_DIR)/test_cbuf.c
-TEST_OBJ := $(BUILD)/test_cbuf.o
-TEST_BIN := $(BUILD)/cbuf_tests
+$(BUILD_DIR):
+	mkdir -p $@
 
+# Compile library sources
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.c | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -c $< -o $@
 
-#We declare that these are commands not files
-.PHONY: all clean run
+# Compile test sources
+$(BUILD_DIR)/%.o: $(TEST_DIR)/%.c | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -c $< -o $@
 
-#Same but for test
-.PHONY: test
-test: $(TEST_BIN)
-	$(TEST_BIN)
+# Static library
+$(BUILD_DIR)/libcbuf.a: $(OBJ)
+	ar rcs $@ $^
 
-# Build everything
-all: $(TARGET)
+# Link test runner
+$(BUILD_DIR)/tests: $(TEST_OBJ) $(BUILD_DIR)/libcbuf.a
+	$(CC) $^ -o $@
 
-# Ensure build dir exists if not already
-$(BUILD):
-	@mkdir -p $(BUILD)
+test: $(BUILD_DIR)/tests
+	./$(BUILD_DIR)/tests
 
-#First making sure build exists and we have our source files then we build our object files with our compiler
-$(BUILD)/%.o: $(SRC_DIR)/%.c | $(BUILD)
-	$(CC) $(CFLAGS) -I$(INCDIR) -c $< -o $@
+run: test
 
-#Compile test object
-$(BUILD)/test_cbuf.o: $(TEST_SRC) | $(BUILD)
-	$(CC) $(CFLAGS) -I$(INCDIR) -c $< -o $@
-
-# Build static library from object files
-$(LIB): $(OBJS)
-	$(AR) $(ARFLAGS) $@ $^
-
-# Link the demo with library to create finally executable
-$(TARGET): $(DEMOOBJ) $(LIB)
-	$(CC) $(CFLAGS) $(DEMOOBJ) -L$(BUILD) -lcbuf -o $@
-
-# Same but with test files
-$(TEST_BIN): $(LIB) $(TEST_OBJ)
-	$(CC) $(CFLAGS) $(TEST_OBJ) -L$(BUILD) -lcbuf -o $(TEST_BIN)
-
-# Run both files
-run: $(TARGET) $(TEST_BIN)
-	$(TARGET)
-	$(TEST_BIN)
-
-
-# Basically remove all files when rebuilding
 clean:
-	rm -rf $(BUILD)
+	rm -rf $(BUILD_DIR)
 
+.PHONY: all test run clean
